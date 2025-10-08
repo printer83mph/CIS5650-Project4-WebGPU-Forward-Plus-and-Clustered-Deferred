@@ -25,32 +25,45 @@ stats.showPanel(0);
 document.body.appendChild(stats.dom);
 
 const gui = new GUI();
-gui.add(lights, 'numLights').min(1).max(Lights.maxNumLights).step(1).onChange(() => {
+gui
+  .add(lights, 'numLights')
+  .min(1)
+  .max(Lights.maxNumLights)
+  .step(1)
+  .onChange(() => {
     lights.updateLightSetUniformNumLights();
-});
+  });
 
 const stage = new Stage(scene, lights, camera, stats);
 
 var renderer: Renderer | undefined;
 
 function setRenderer(mode: string) {
-    renderer?.stop();
+  renderer?.stop();
 
-    switch (mode) {
-        case renderModes.naive:
-            renderer = new NaiveRenderer(stage);
-            break;
-        case renderModes.forwardPlus:
-            renderer = new ForwardPlusRenderer(stage);
-            break;
-        case renderModes.clusteredDeferred:
-            renderer = new ClusteredDeferredRenderer(stage);
-            break;
-    }
+  switch (mode) {
+    case renderModes.naive:
+      renderer = new NaiveRenderer(stage);
+      break;
+    case renderModes.forwardPlus:
+      renderer = new ForwardPlusRenderer(stage);
+      break;
+    case renderModes.clusteredDeferred:
+      renderer = new ClusteredDeferredRenderer(stage);
+      break;
+  }
 }
 
-const renderModes = { naive: 'naive', forwardPlus: 'forward+', clusteredDeferred: 'clustered deferred' };
-let renderModeController = gui.add({ mode: renderModes.naive }, 'mode', renderModes);
+const renderModes = {
+  naive: 'naive',
+  forwardPlus: 'forward+',
+  clusteredDeferred: 'clustered deferred',
+};
+let renderModeController = gui.add(
+  { mode: renderModes.naive },
+  'mode',
+  renderModes,
+);
 renderModeController.onChange(setRenderer);
 
 setRenderer(renderModeController.getValue());
