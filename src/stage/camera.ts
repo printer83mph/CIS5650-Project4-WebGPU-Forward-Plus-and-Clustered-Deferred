@@ -1,11 +1,15 @@
 import { Mat4, mat4, Vec3, vec3 } from 'wgpu-matrix';
 import { toRadians } from '../math_util';
+// @ts-expect-error TODO: use this
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { device, canvas, fovYDegrees, aspectRatio } from '../renderer';
 
 class CameraUniforms {
   readonly buffer = new ArrayBuffer(16 * 4);
+  // @ts-expect-error TODO: use this
   private readonly floatView = new Float32Array(this.buffer);
 
+  // @ts-expect-error TODO: use this
   set viewProjMat(mat: Float32Array) {
     // TODO-1.1: set the first 16 elements of `this.floatView` to the input `mat`
   }
@@ -15,6 +19,7 @@ class CameraUniforms {
 
 export class Camera {
   uniforms: CameraUniforms = new CameraUniforms();
+  // @ts-expect-error TODO: initialize this better lol
   uniformsBuffer: GPUBuffer;
 
   projMat: Mat4 = mat4.create();
@@ -138,6 +143,8 @@ export class Camera {
 
     const lookPos = vec3.add(this.cameraPos, vec3.scale(this.cameraFront, 1));
     const viewMat = mat4.lookAt(this.cameraPos, lookPos, [0, 1, 0]);
+    // @ts-expect-error TODO: use this
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const viewProjMat = mat4.mul(this.projMat, viewMat);
     // TODO-1.1: set `this.uniforms.viewProjMat` to the newly calculated view proj mat
 

@@ -14,7 +14,7 @@ import { Stage } from './stage/stage';
 await initWebGPU();
 setupLoaders();
 
-let scene = new Scene();
+const scene = new Scene();
 await scene.loadGltf('./scenes/sponza/Sponza.gltf');
 
 const camera = new Camera();
@@ -36,7 +36,7 @@ gui
 
 const stage = new Stage(scene, lights, camera, stats);
 
-var renderer: Renderer | undefined;
+let renderer: Renderer | undefined;
 
 function setRenderer(mode: string) {
   renderer?.stop();
@@ -59,7 +59,7 @@ const renderModes = {
   forwardPlus: 'forward+',
   clusteredDeferred: 'clustered deferred',
 };
-let renderModeController = gui.add(
+const renderModeController = gui.add(
   { mode: renderModes.naive },
   'mode',
   renderModes,

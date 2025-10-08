@@ -1,5 +1,7 @@
 // CHECKITOUT: this file loads all the shaders and preprocesses them with some common code
 
+// @ts-expect-error TODO: use this
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Camera } from '../stage/camera';
 
 import commonRaw from './common.wgsl?raw';

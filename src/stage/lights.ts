@@ -6,7 +6,7 @@ import { Camera } from './camera';
 
 // h in [0, 1]
 function hueToRgb(h: number) {
-  let f = (n: number, k = (n + h * 6) % 6) =>
+  const f = (n: number, k = (n + h * 6) % 6) =>
     1 - Math.max(Math.min(k, 4 - k, 1), 0);
   return vec3.lerp(vec3.create(1, 1, 1), vec3.create(f(5), f(3), f(1)), 0.8);
 }
@@ -122,6 +122,8 @@ export class Lights {
     );
   }
 
+  // @ts-expect-error TODO: use this
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   doLightClustering(encoder: GPUCommandEncoder) {
     // TODO-2: run the light clustering compute pass(es) here
     // implementing clustering here allows for reusing the code in both Forward+ and Clustered Deferred

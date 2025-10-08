@@ -1,4 +1,6 @@
 import * as renderer from '../renderer';
+// @ts-expect-error TODO: use this
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as shaders from '../shaders/shaders';
 import { Stage } from '../stage/stage';
 

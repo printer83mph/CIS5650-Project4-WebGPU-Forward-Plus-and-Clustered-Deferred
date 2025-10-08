@@ -3,17 +3,18 @@ import { Lights } from './stage/lights';
 import { Camera } from './stage/camera';
 import { Stage } from './stage/stage';
 
-export var canvas: HTMLCanvasElement;
-export var canvasFormat: GPUTextureFormat;
-export var context: GPUCanvasContext;
-export var device: GPUDevice;
-export var canvasTextureView: GPUTextureView;
+// TODO: surely we can dep inject these instead of globalizing them
+export let canvas: HTMLCanvasElement;
+export let canvasFormat: GPUTextureFormat;
+export let context: GPUCanvasContext;
+export let device: GPUDevice;
+export let canvasTextureView: GPUTextureView;
 
-export var aspectRatio: number;
+export let aspectRatio: number;
 export const fovYDegrees = 45;
 
-export var modelBindGroupLayout: GPUBindGroupLayout;
-export var materialBindGroupLayout: GPUBindGroupLayout;
+export let modelBindGroupLayout: GPUBindGroupLayout;
+export let materialBindGroupLayout: GPUBindGroupLayout;
 
 // CHECKITOUT: this function initializes WebGPU and also creates some bind group layouts shared by all the renderers
 export async function initWebGPU() {
@@ -26,7 +27,7 @@ export async function initWebGPU() {
   aspectRatio = canvas.width / canvas.height;
 
   if (!navigator.gpu) {
-    let errorMessageElement = document.createElement('h1');
+    const errorMessageElement = document.createElement('h1');
     errorMessageElement.textContent =
       "This browser doesn't support WebGPU! Try using Google Chrome.";
     errorMessageElement.style.paddingLeft = '0.4em';
@@ -137,7 +138,7 @@ export abstract class Renderer {
       this.prevTime = time;
     }
 
-    let deltaTime = time - this.prevTime;
+    const deltaTime = time - this.prevTime;
     this.camera.onFrame(deltaTime);
     this.lights.onFrame(time);
 

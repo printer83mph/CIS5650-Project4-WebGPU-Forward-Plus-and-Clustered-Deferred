@@ -201,7 +201,7 @@ export class Mesh {
 }
 
 export class Node {
-  name: String = 'node';
+  name: string = 'node';
 
   parent: Node | undefined;
   children: Set<Node> = new Set<Node>();
@@ -250,14 +250,14 @@ export class Node {
       });
     }
 
-    for (let child of this.children) {
+    for (const child of this.children) {
       child.propagateTransformations();
     }
   }
 }
 
 function createTexture(imageBitmap: ImageBitmap): GPUTexture {
-  let texture = device.createTexture({
+  const texture = device.createTexture({
     size: [imageBitmap.width, imageBitmap.height],
     format: 'rgba8unorm',
     usage:
@@ -289,7 +289,7 @@ function convertWrapModeEnum(wrapMode: number): GPUAddressMode {
 }
 
 function createSampler(gltfSampler: GLTFSampler): GPUSampler {
-  let samplerDescriptor: GPUSamplerDescriptor = {};
+  const samplerDescriptor: GPUSamplerDescriptor = {};
 
   switch (gltfSampler.magFilter) {
     case 0x2600: // NEAREST
@@ -350,19 +350,19 @@ export class Scene {
     const gltfWithBuffers = (await load(filePath)) as GLTFWithBuffers;
     const gltf = gltfWithBuffers.json;
 
-    let sceneTextures: Texture[] = [];
+    const sceneTextures: Texture[] = [];
     {
-      let sceneImages: GPUTexture[] = [];
-      for (let gltfImage of gltfWithBuffers.images!) {
+      const sceneImages: GPUTexture[] = [];
+      for (const gltfImage of gltfWithBuffers.images!) {
         sceneImages.push(createTexture(gltfImage as ImageBitmap));
       }
 
-      let sceneSamplers: GPUSampler[] = [];
-      for (let gltfSampler of gltf.samplers!) {
+      const sceneSamplers: GPUSampler[] = [];
+      for (const gltfSampler of gltf.samplers!) {
         sceneSamplers.push(createSampler(gltfSampler));
       }
 
-      for (let gltfTexture of gltf.textures!) {
+      for (const gltfTexture of gltf.textures!) {
         sceneTextures.push(
           new Texture(
             sceneImages[gltfTexture.source!],
@@ -372,23 +372,23 @@ export class Scene {
       }
     }
 
-    let sceneMaterials: Material[] = [];
-    for (let gltfMaterial of gltf.materials!) {
+    const sceneMaterials: Material[] = [];
+    for (const gltfMaterial of gltf.materials!) {
       sceneMaterials.push(new Material(gltfMaterial, sceneTextures));
     }
 
-    let sceneMeshes: Mesh[] = [];
-    for (let gltfMesh of gltf.meshes!) {
+    const sceneMeshes: Mesh[] = [];
+    for (const gltfMesh of gltf.meshes!) {
       sceneMeshes.push(new Mesh(gltfMesh, gltfWithBuffers, sceneMaterials));
     }
 
-    let sceneRoot: Node = new Node();
+    const sceneRoot: Node = new Node();
     sceneRoot.setName('scene root');
     sceneRoot.setParent(this.root);
 
-    let sceneNodes: Node[] = [];
-    for (let gltfNode of gltf.nodes!) {
-      let newNode = new Node();
+    const sceneNodes: Node[] = [];
+    for (const gltfNode of gltf.nodes!) {
+      const newNode = new Node();
       newNode.setName(gltfNode.name);
       newNode.setParent(sceneRoot);
 
@@ -424,14 +424,14 @@ export class Scene {
       sceneNodes.push(newNode);
     }
 
-    for (let nodeIdx in gltf.nodes!) {
+    for (const nodeIdx in gltf.nodes!) {
       const gltfNode = gltf.nodes[nodeIdx];
 
       if (gltfNode.children == undefined) {
         continue;
       }
 
-      for (let childNodeIdx of gltfNode.children) {
+      for (const childNodeIdx of gltfNode.children) {
         sceneNodes[childNodeIdx].setParent(sceneNodes[nodeIdx]);
       }
     }
@@ -444,16 +444,16 @@ export class Scene {
     materialFunction: (material: Material) => void,
     primFunction: (primitive: Primitive) => void,
   ) {
-    let nodes = [this.root];
+    const nodes = [this.root];
 
     let lastMaterialId: number | undefined = undefined;
 
     while (nodes.length > 0) {
-      let node = nodes.pop() as Node;
+      const node = nodes.pop() as Node;
       if (node.mesh != undefined) {
         nodeFunction(node);
 
-        for (let primitive of node.mesh.primitives) {
+        for (const primitive of node.mesh.primitives) {
           if (primitive.material.id != lastMaterialId) {
             materialFunction(primitive.material);
             lastMaterialId = primitive.material.id;
@@ -463,7 +463,7 @@ export class Scene {
         }
       }
 
-      for (let childNode of node.children) {
+      for (const childNode of node.children) {
         nodes.push(childNode);
       }
     }
