@@ -5,16 +5,23 @@
   "type": "module",
   "scripts": {
     "dev": "vite --open",
-    "build": "vite build && cp -r scenes/ dist/"
+    "build": "echo \"TODO: move scenes to public folder!!\" && vite build && cp -r scenes/ dist/",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
+    "@eslint/js": "^9.37.0",
     "@types/dat.gui": "^0.7.13",
     "@types/node": "^24.7.0",
     "@types/seedrandom": "^3.0.8",
     "@types/stats.js": "^0.17.3",
     "@webgpu/types": "^0.1.44",
+    "eslint": "^9.37.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^16.4.0",
     "prettier": "^3.6.2",
     "typescript": "^5.2.2",
+    "typescript-eslint": "^8.46.0",
     "vite": "^7.1.9"
   },
   "dependencies": {
