@@ -12,6 +12,7 @@ function hueToRgb(h: number) {
 }
 
 export class Lights {
+  // @ts-expect-error TODO: this will eventually be used
   private camera: Camera;
 
   numLights = 500;

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --open",
     "build": "echo \"TODO: move scenes to public folder!!\" && vite build && cp -r scenes/ dist/",
+    "typecheck": "tsc",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix"
   },
