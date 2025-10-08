@@ -8,17 +8,12 @@
       "name": "Vite Dev Server",
       "request": "launch",
       "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "dev"
-      ],
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
+      "runtimeArgs": ["run", "dev", "--", "--host=127.0.0.1"],
+      "skipFiles": ["<node_internals>/**"],
       "type": "node",
       "serverReadyAction": {
         "action": "openExternally",
-        "pattern": "  ➜  Local:   http://localhost:([0-9]+)/",
+        "pattern": "  ➜  Local:   http://127.0.0.1:([0-9]+)/",
         "uriFormat": "http://localhost:%s",
         "killOnServerStop": false
       }
