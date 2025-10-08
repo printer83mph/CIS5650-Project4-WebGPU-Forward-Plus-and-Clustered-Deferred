@@ -5,7 +5,8 @@ so you may run into issues loading files outside of the Sponza scene.
 In particular, it is known to not work if there is a mesh with no material.
 */
 
-import { registerLoaders, load } from '@loaders.gl/core';
+import { load } from '@loaders.gl/core';
+
 import {
   GLTFLoader,
   GLTFWithBuffers,
@@ -14,6 +15,8 @@ import {
   GLTFMaterial,
   GLTFSampler,
 } from '@loaders.gl/gltf';
+// @ts-expect-error TODO: use this
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ImageLoader } from '@loaders.gl/images';
 import { Mat4, mat4 } from 'wgpu-matrix';
 import {
@@ -21,10 +24,6 @@ import {
   materialBindGroupLayout,
   modelBindGroupLayout,
 } from '../renderer';
-
-export function setupLoaders() {
-  registerLoaders([GLTFLoader, ImageLoader]);
-}
 
 function getFloatArray(gltfWithBuffers: GLTFWithBuffers, attribute: number) {
   const gltf = gltfWithBuffers.json;
@@ -351,7 +350,9 @@ export class Scene {
   }
 
   async loadGltf(filePath: string) {
-    const gltfWithBuffers = (await load(filePath)) as GLTFWithBuffers;
+    const gltfWithBuffers = await load(filePath, GLTFLoader, {
+      // GLTF loading options...
+    });
     const gltf = gltfWithBuffers.json;
 
     const sceneTextures: Texture[] = [];
