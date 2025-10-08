@@ -8,7 +8,9 @@
     "build": "echo \"TODO: move scenes to public folder!!\" && vite build && cp -r scenes/ dist/",
     "typecheck": "tsc",
     "lint": "eslint . --max-warnings=0",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "format": "prettier . -w",
+    "format:check": "prettier ."
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",
