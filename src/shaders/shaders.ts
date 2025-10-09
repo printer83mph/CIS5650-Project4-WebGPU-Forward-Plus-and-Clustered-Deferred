@@ -1,5 +1,7 @@
 // CHECKITOUT: this file loads all the shaders and preprocesses them with some common code
 
+// @ts-expect-error TODO: use this
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Camera } from '../stage/camera';
 
 import commonRaw from './common.wgsl?raw';
@@ -24,25 +26,31 @@ import clusteringComputeRaw from './clustering.cs.wgsl?raw';
 // Note that these are declared in a somewhat roundabout way because otherwise minification will drop variables
 // that are unused in host side code.
 export const constants = {
-    bindGroup_scene: 0,
-    bindGroup_model: 1,
-    bindGroup_material: 2,
+  bindGroup_scene: 0,
+  bindGroup_model: 1,
+  bindGroup_material: 2,
 
-    moveLightsWorkgroupSize: 128,
+  moveLightsWorkgroupSize: 128,
 
-    lightRadius: 2
+  lightRadius: 2,
 };
 
 // =================================
 
 function evalShaderRaw(raw: string) {
-    return eval('`' + raw.replaceAll('${', '${constants.') + '`');
+  return raw.replace(/\$\{(\w+)\}/g, (_, key) => {
+    if (!(key in constants)) {
+      console.error(`Constant '${key}' not found!`);
+      return '';
+    }
+    return String(constants[key as keyof typeof constants]);
+  });
 }
 
 const commonSrc: string = evalShaderRaw(commonRaw);
 
 function processShaderRaw(raw: string) {
-    return commonSrc + evalShaderRaw(raw);
+  return commonSrc + evalShaderRaw(raw);
 }
 
 export const naiveVertSrc: string = processShaderRaw(naiveVertRaw);
@@ -50,9 +58,17 @@ export const naiveFragSrc: string = processShaderRaw(naiveFragRaw);
 
 export const forwardPlusFragSrc: string = processShaderRaw(forwardPlusFragRaw);
 
-export const clusteredDeferredFragSrc: string = processShaderRaw(clusteredDeferredFragRaw);
-export const clusteredDeferredFullscreenVertSrc: string = processShaderRaw(clusteredDeferredFullscreenVertRaw);
-export const clusteredDeferredFullscreenFragSrc: string = processShaderRaw(clusteredDeferredFullscreenFragRaw);
+export const clusteredDeferredFragSrc: string = processShaderRaw(
+  clusteredDeferredFragRaw,
+);
+export const clusteredDeferredFullscreenVertSrc: string = processShaderRaw(
+  clusteredDeferredFullscreenVertRaw,
+);
+export const clusteredDeferredFullscreenFragSrc: string = processShaderRaw(
+  clusteredDeferredFullscreenFragRaw,
+);
 
-export const moveLightsComputeSrc: string = processShaderRaw(moveLightsComputeRaw);
-export const clusteringComputeSrc: string = processShaderRaw(clusteringComputeRaw);
+export const moveLightsComputeSrc: string =
+  processShaderRaw(moveLightsComputeRaw);
+export const clusteringComputeSrc: string =
+  processShaderRaw(clusteringComputeRaw);

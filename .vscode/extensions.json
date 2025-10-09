@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "polymeilex.wgsl",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "github.vscode-github-actions"
+  ]
+}
