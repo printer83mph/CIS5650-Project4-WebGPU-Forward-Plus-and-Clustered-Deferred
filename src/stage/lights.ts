@@ -1,5 +1,5 @@
 import { vec3 } from 'wgpu-matrix';
-import { device } from '../renderer';
+import { canvas, device } from '../renderer';
 
 import * as shaders from '../shaders/shaders';
 import { Camera } from './camera';
@@ -15,16 +15,20 @@ export class Lights {
   // @ts-expect-error TODO: this will eventually be used
   private camera: Camera;
 
-  numLights = 500;
+  numLights = 30;
   static readonly maxNumLights = 5000;
   static readonly numFloatsPerLight = 8; // vec3f is aligned at 16 byte boundaries
 
   static readonly lightIntensity = 0.1;
 
+  static readonly numFloatsPerCluster =
+    1 + 3 + shaders.constants.maxLightsPerCluster; // extra space for padding
+
   lightsArray = new Float32Array(
     Lights.maxNumLights * Lights.numFloatsPerLight,
   );
   lightSetStorageBuffer: GPUBuffer;
+  clusterSetStorageBuffer: GPUBuffer;
 
   timeUniformBuffer: GPUBuffer;
 
@@ -44,6 +48,20 @@ export class Lights {
     });
     this.populateLightsBuffer();
     this.updateLightSetUniformNumLights();
+
+    const devicePixelRatio = window.devicePixelRatio;
+    const [screenWidth, screenHeight] = [
+      canvas.clientWidth * devicePixelRatio,
+      canvas.clientHeight * devicePixelRatio,
+    ];
+    this.clusterSetStorageBuffer = device.createBuffer({
+      label: 'clusters',
+      size:
+        Math.floor(screenWidth / shaders.constants.clusterSizeXY) *
+        Math.floor(screenHeight / shaders.constants.clusterSizeXY) *
+        Lights.numFloatsPerCluster,
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+    });
 
     this.timeUniformBuffer = device.createBuffer({
       label: 'time uniform',

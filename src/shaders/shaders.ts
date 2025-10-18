@@ -33,6 +33,11 @@ export const constants = {
   moveLightsWorkgroupSize: 128,
 
   lightRadius: 2,
+
+  // cluster things!
+  maxLightsPerCluster: 8,
+  clusterSizeXY: 64,
+  numClusterSlicesZ: 32,
 };
 
 // =================================

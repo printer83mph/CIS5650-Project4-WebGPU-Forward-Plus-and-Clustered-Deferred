@@ -5,9 +5,11 @@
 
 struct FragmentInput
 {
+    @builtin(position) fragPos: vec4f,
     @location(0) pos: vec3f,
-    @location(1) nor: vec3f,
-    @location(2) uv: vec2f
+    @location(1) viewPos: vec3f,
+    @location(2) nor: vec3f,
+    @location(3) uv: vec2f
 }
 
 @fragment
