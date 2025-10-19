@@ -260,8 +260,8 @@ export class ClusteredDeferredRenderer extends renderer.Renderer {
     const encoder = renderer.device.createCommandEncoder();
     const canvasTextureView = renderer.context.getCurrentTexture().createView();
 
-    // TODO: run the clustering compute shader
-    // this.lights.doLightClustering(encoder);
+    // run the clustering compute shader
+    this.lights.doLightClustering(encoder);
 
     // run the G-buffer pass, outputting position, albedo, and normals
     const gBufferRenderPass = encoder.beginRenderPass({

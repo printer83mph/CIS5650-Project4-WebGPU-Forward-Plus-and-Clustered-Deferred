@@ -16,7 +16,29 @@ struct FragmentInput
 // Similar to the Forward+ fragment shader, but with vertex information coming from the G-buffer instead.
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4f {
-    // TODO: read from buffers etc
-    let finalColor = vec3f(in.uv, 1.0);
+    let pos          = textureSample(posBuffer, pixelSampler, in.uv);
+    let diffuseColor = textureSample(diffuseBuffer, pixelSampler, in.uv);
+    let nor          = textureSample(norBuffer, pixelSampler, in.uv);
+
+    let viewPos = cameraUniforms.viewMat * pos;
+    
+    let clusterIndex = getClusterIndex(
+      in.fragPos,
+      viewPos.xyz,
+      clusterSet.numClusters.x,
+      clusterSet.numClusters.y,
+      cameraUniforms.nearPlane,
+      cameraUniforms.farPlane
+    );
+    let cluster = clusterSet.clusters[clusterIndex];
+
+    var totalLightContrib = vec3f(0, 0, 0);
+    for (var i = 0u; i < cluster.numLights; i++) {
+        let light = lightSet.lights[cluster.lightIndices[i]];
+        totalLightContrib += calculateLightContrib(light, pos.xyz, nor.xyz);
+    }
+
+    // let finalColor = generateClusterColor(clusterIndex);
+    let finalColor = diffuseColor.rgb * totalLightContrib;
     return vec4f(finalColor, 1.0);
 }
