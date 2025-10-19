@@ -12,7 +12,6 @@ function hueToRgb(h: number) {
 }
 
 export class Lights {
-  // @ts-expect-error TODO: this will eventually be used
   private camera: Camera;
 
   numLights = 30;
@@ -28,7 +27,7 @@ export class Lights {
     Lights.maxNumLights * Lights.numFloatsPerLight,
   );
   lightSetStorageBuffer: GPUBuffer;
-  clusterSetStorageBuffer: GPUBuffer;
+  clusterSetStorageBuffer!: GPUBuffer;
 
   timeUniformBuffer: GPUBuffer;
 
@@ -36,7 +35,10 @@ export class Lights {
   moveLightsComputeBindGroup: GPUBindGroup;
   moveLightsComputePipeline: GPUComputePipeline;
 
-  // TODO-2: add layouts, pipelines, textures, etc. needed for light clustering here
+  // these are assigned in `setupClusteringPipeline`
+  clusteringComputeBindGroupLayout!: GPUBindGroupLayout;
+  clusteringComputeBindGroup!: GPUBindGroup;
+  clusteringComputePipeline!: GPUComputePipeline;
 
   constructor(camera: Camera) {
     this.camera = camera;
@@ -48,20 +50,6 @@ export class Lights {
     });
     this.populateLightsBuffer();
     this.updateLightSetUniformNumLights();
-
-    const devicePixelRatio = window.devicePixelRatio;
-    const [screenWidth, screenHeight] = [
-      canvas.clientWidth * devicePixelRatio,
-      canvas.clientHeight * devicePixelRatio,
-    ];
-    this.clusterSetStorageBuffer = device.createBuffer({
-      label: 'clusters',
-      size:
-        Math.floor(screenWidth / shaders.constants.clusterSizeXY) *
-        Math.floor(screenHeight / shaders.constants.clusterSizeXY) *
-        Lights.numFloatsPerCluster,
-      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-    });
 
     this.timeUniformBuffer = device.createBuffer({
       label: 'time uniform',
@@ -117,7 +105,88 @@ export class Lights {
       },
     });
 
-    // TODO-2: initialize layouts, pipelines, textures, etc. needed for light clustering here
+    // initialize layouts, pipelines, textures, etc. needed for light clustering here
+    this.setupClusteringPipeline();
+  }
+
+  private setupClusteringPipeline() {
+    const devicePixelRatio = window.devicePixelRatio;
+    const [screenWidth, screenHeight] = [
+      canvas.clientWidth * devicePixelRatio,
+      canvas.clientHeight * devicePixelRatio,
+    ];
+    const [clustersX, clustersY] = [
+      Math.ceil(screenWidth / shaders.constants.clusterSizeXY),
+      Math.ceil(screenHeight / shaders.constants.clusterSizeXY),
+    ];
+
+    this.clusterSetStorageBuffer = device.createBuffer({
+      label: 'clusters',
+      size: 16 + clustersX * clustersY * Lights.numFloatsPerCluster,
+      //    ^ 16 for numClusters + padding, plus (max lights per cluster) times (max possible cluster amount)
+      //                                         times 4 for u32 length
+
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+    });
+    // populate numClusters
+    this.updateClusterSetUniformNumClusters(clustersX, clustersY);
+
+    this.clusteringComputeBindGroupLayout = device.createBindGroupLayout({
+      label: 'clustering compute bind group layout',
+      entries: [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.COMPUTE,
+          buffer: { type: 'uniform' },
+        },
+        {
+          // lightSet
+          binding: 1,
+          visibility: GPUShaderStage.COMPUTE,
+          buffer: { type: 'read-only-storage' },
+        },
+        {
+          // clusterSet
+          binding: 2,
+          visibility: GPUShaderStage.COMPUTE,
+          buffer: { type: 'storage' },
+        },
+      ],
+    });
+
+    this.clusteringComputeBindGroup = device.createBindGroup({
+      label: 'clustering compute bind group layout',
+      layout: this.clusteringComputeBindGroupLayout,
+      entries: [
+        {
+          binding: 0,
+          resource: { buffer: this.camera.uniformsBuffer },
+        },
+        {
+          binding: 1,
+          resource: { buffer: this.lightSetStorageBuffer },
+        },
+        {
+          binding: 2,
+          resource: { buffer: this.clusterSetStorageBuffer },
+        },
+      ],
+    });
+
+    this.clusteringComputePipeline = device.createComputePipeline({
+      label: 'clustering compute pipeline',
+      layout: device.createPipelineLayout({
+        label: 'clustering compute pipeline layout',
+        bindGroupLayouts: [this.clusteringComputeBindGroupLayout],
+      }),
+      compute: {
+        module: device.createShaderModule({
+          label: 'clustering compute shader',
+          code: shaders.clusteringComputeSrc,
+        }),
+        entryPoint: 'main',
+      },
+    });
   }
 
   private populateLightsBuffer() {
@@ -138,6 +207,14 @@ export class Lights {
       this.lightSetStorageBuffer,
       0,
       new Uint32Array([this.numLights]),
+    );
+  }
+
+  updateClusterSetUniformNumClusters(x: number, y: number) {
+    device.queue.writeBuffer(
+      this.clusterSetStorageBuffer,
+      0,
+      new Uint32Array([x, y]),
     );
   }
 

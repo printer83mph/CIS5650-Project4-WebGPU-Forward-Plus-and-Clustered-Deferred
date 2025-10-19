@@ -41,6 +41,7 @@ fn main(in: FragmentInput) -> @location(0) vec4f
         discard;
     }
 
+    // TODO: replace this with clusterSet.numClusters once we precompute that
     let numClusters = cameraUniforms.resolution / ${clusterSizeXY};
     let clusterIndex = getClusterIndex(
       in.fragPos,

@@ -27,7 +27,8 @@ struct CameraUniforms {
     nearPlane: f32,
     farPlane: f32,
     resolution: vec2u,
-    viewMat: mat4x4f
+    viewMat: mat4x4f,
+    invProj: mat4x4f
 }
 
 // CHECKITOUT: this special attenuation function ensures lights don't affect geometry outside the maximum light radius
@@ -71,4 +72,3 @@ fn getClusterIndex(fragPos: vec4f, viewPos: vec3f,
     //        + clusterXYCoord.x * ${numClusterSlicesZ}
     //        + clusterXYCoord.y * ${numClusterSlicesZ} * numClustersX;
 }
-

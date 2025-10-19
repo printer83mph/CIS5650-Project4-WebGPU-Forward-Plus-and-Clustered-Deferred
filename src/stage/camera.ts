@@ -3,16 +3,24 @@ import { toRadians } from '../math_util';
 import { device, canvas, fovYDegrees, aspectRatio } from '../renderer';
 
 class CameraUniforms {
-  readonly buffer = new ArrayBuffer(144);
+  readonly buffer = new ArrayBuffer(208);
   private readonly viewProjView = new Float32Array(this.buffer, 0, 16);
   private readonly nearPlaneView = new Float32Array(this.buffer, 64, 1);
   private readonly farPlaneView = new Float32Array(this.buffer, 68, 1);
   private readonly resolutionView = new Float32Array(this.buffer, 72, 2);
   private readonly viewMatView = new Float32Array(this.buffer, 80, 16);
+  private readonly invProjView = new Float32Array(this.buffer, 144, 16);
 
   set viewProjMat(mat: Float32Array) {
     // DONE-1.1: set the first 16 elements of `this.viewProjView` to the input `mat`
     this.viewProjView.set(mat);
+
+    const invProj = mat4.create();
+    invProj[0] = 1.0 / mat[0];
+    invProj[5] = 1.0 / mat[5];
+    invProj[11] = -1.0;
+    invProj[14] = 1.0;
+    this.invProjView.set(invProj);
   }
 
   // add extra functions to set values needed for light clustering here

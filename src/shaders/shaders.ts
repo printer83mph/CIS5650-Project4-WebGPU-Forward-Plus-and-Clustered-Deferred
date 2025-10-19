@@ -38,6 +38,8 @@ export const constants = {
   maxLightsPerCluster: 8,
   clusterSizeXY: 64,
   numClusterSlicesZ: 32,
+
+  clusteringWorkgroupSize: 128,
 };
 
 // =================================

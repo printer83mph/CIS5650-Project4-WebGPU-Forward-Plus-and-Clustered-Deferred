@@ -16,7 +16,6 @@ export class ForwardPlusRenderer extends renderer.Renderer {
   constructor(stage: Stage) {
     super(stage);
 
-    // TODO-2: initialize layouts, pipelines, textures, etc. needed for Forward+ here
     this.sceneUniformsBindGroupLayout = renderer.device.createBindGroupLayout({
       label: 'scene uniforms bind group layout',
       entries: [
