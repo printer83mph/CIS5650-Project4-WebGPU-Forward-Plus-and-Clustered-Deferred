@@ -7,11 +7,12 @@
 @compute
 @workgroup_size(${clusteringWorkgroupSize})
 fn main(@builtin(global_invocation_id) globalIdx: vec3u) {
-    let clusterIdx = getClusterIndexFromCoord(globalIdx, clusterSet.numClusters);
+    let clusterIdx = globalIdx.x;
+    let clusterCoord = getClusterCoordFromIndex(clusterIdx, clusterSet.numClusters);
 
     // Get cluster bounds and planes
     let bounds = getClusterBounds(
-        globalIdx,
+        clusterCoord,
         cameraUniforms.nearPlane, cameraUniforms.farPlane, cameraUniforms.resolution, cameraUniforms.invProj
     );
     let clusterPlanes = getViewSpaceClusterPlanes(bounds, cameraUniforms.invProj);

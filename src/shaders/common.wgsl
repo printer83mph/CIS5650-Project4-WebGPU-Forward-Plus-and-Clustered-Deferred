@@ -134,8 +134,11 @@ struct Plane {
 
 // take AABB with XY in NDC and Z in view space (negative), and unproject X and Y to view space
 fn unproject(pos: vec3f, invProj: mat4x4f) -> vec3f {
-    let viewPos = invProj * vec4f(pos.xy, -1.0, 1.0);
-    return vec3f(viewPos.xy / viewPos.w * pos.z, pos.z);
+    let ndc = vec4f(pos.xy, 1.0, 1.0);
+    let view = invProj * ndc;
+    let viewPos = view.xyz / view.w;
+    let scale = pos.z / viewPos.z;
+    return viewPos * scale;
 }
 
 // We expect p1, p2, and p3 to be in a CCW order (right hand rule)

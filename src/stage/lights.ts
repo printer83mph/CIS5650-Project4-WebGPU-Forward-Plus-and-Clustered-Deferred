@@ -21,7 +21,7 @@ export class Lights {
   static readonly lightIntensity = 0.1;
 
   static readonly numFloatsPerCluster =
-    1 + 3 + shaders.constants.maxLightsPerCluster; // extra space for padding
+    1 + 3 + shaders.constants.maxLightsPerCluster * 4; // extra space for padding
 
   lightsArray = new Float32Array(
     Lights.maxNumLights * Lights.numFloatsPerLight,
@@ -230,8 +230,12 @@ export class Lights {
 
     const [clustersX, clustersY] = this.numClusters;
     const clustersZ = shaders.constants.numClusterSlicesZ;
+    const workgroupCount = Math.ceil(
+      (clustersX * clustersY * clustersZ) /
+        shaders.constants.clusteringWorkgroupSize,
+    );
 
-    computePass.dispatchWorkgroups(clustersX, clustersY, clustersZ);
+    computePass.dispatchWorkgroups(workgroupCount);
     computePass.end();
   }
 
