@@ -42,6 +42,9 @@ export const constants = {
   numClusterSlicesZ: 32,
 
   clusteringWorkgroupSize: 128,
+
+  // deferred stuff
+  bindGroup_gBuffers: 1,
 };
 
 // =================================
