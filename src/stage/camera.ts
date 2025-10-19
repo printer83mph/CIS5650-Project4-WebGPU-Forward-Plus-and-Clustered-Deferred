@@ -7,20 +7,17 @@ class CameraUniforms {
   private readonly viewProjView = new Float32Array(this.buffer, 0, 16);
   private readonly nearPlaneView = new Float32Array(this.buffer, 64, 1);
   private readonly farPlaneView = new Float32Array(this.buffer, 68, 1);
-  private readonly resolutionView = new Float32Array(this.buffer, 72, 2);
+  private readonly resolutionView = new Uint32Array(this.buffer, 72, 2);
   private readonly viewMatView = new Float32Array(this.buffer, 80, 16);
   private readonly invProjView = new Float32Array(this.buffer, 144, 16);
 
   set viewProjMat(mat: Float32Array) {
     // DONE-1.1: set the first 16 elements of `this.viewProjView` to the input `mat`
     this.viewProjView.set(mat);
+  }
 
-    const invProj = mat4.create();
-    invProj[0] = 1.0 / mat[0];
-    invProj[5] = 1.0 / mat[5];
-    invProj[11] = -1.0;
-    invProj[14] = 1.0;
-    this.invProjView.set(invProj);
+  set invProjMat(mat: Float32Array) {
+    this.invProjView.set(mat);
   }
 
   // add extra functions to set values needed for light clustering here
@@ -89,6 +86,7 @@ export class Camera {
       Camera.nearPlane,
       Camera.farPlane,
     );
+    this.uniforms.invProjMat = mat4.inverse(this.projMat);
 
     this.rotateCamera(0, 0); // set initial camera vectors
 
@@ -184,8 +182,8 @@ export class Camera {
     const viewMat = mat4.lookAt(this.cameraPos, lookPos, [0, 1, 0]);
     const viewProjMat = mat4.mul(this.projMat, viewMat);
 
-    this.uniforms.viewProjMat = viewProjMat;
     this.uniforms.viewMat = viewMat;
+    this.uniforms.viewProjMat = viewProjMat;
 
     // DONE-1.1: upload `this.uniforms.buffer` (host side) to `this.uniformsBuffer` (device side)
     device.queue.writeBuffer(this.uniformsBuffer, 0, this.uniforms.buffer);

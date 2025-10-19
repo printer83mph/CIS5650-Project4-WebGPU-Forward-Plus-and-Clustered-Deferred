@@ -50,16 +50,38 @@ fn main(in: FragmentInput) -> @location(0) vec4f
       cameraUniforms.farPlane
     );
 
-    // TODO: once cluster-intersecting lights are computed, this should work!
     var totalLightContrib = vec3f(0, 0, 0);
-    let cluster = clusterSet.clusters[0];
+    // let cluster = clusterSet.clusters[1];
+    let cluster = clusterSet.clusters[clusterIndex];
+
+    // DEBUG
+    let DEBUG_clusterLightCount = f32(cluster.numLights) / f32(${maxLightsPerCluster});
+    // return vec4(vec3(DEBUG_clusterLightCount), 1);
+
+    let DEBUG_clustercoords = getClusterCoordFromIndex(clusterIndex, clusterSet.numClusters);
+    let DEBUG_bounds = getClusterBounds(
+        DEBUG_clustercoords,
+        cameraUniforms.nearPlane, cameraUniforms.farPlane, cameraUniforms.resolution, cameraUniforms.invProj
+    );
+    let DEBUG_bounds_view = vec3f(DEBUG_bounds.min.xy, -DEBUG_bounds.min.z * 0.05);
+    let DEBUG_supposedClusterZIndex = getClusterZCoordFromViewPos(in.viewPos.z, cameraUniforms.nearPlane, cameraUniforms.farPlane);
+    let DEBUG_ZDepth = f32(DEBUG_supposedClusterZIndex) / f32(${numClusterSlicesZ});
+
+
     for (var i = 0u; i < cluster.numLights; i++) {
         let light = lightSet.lights[cluster.lightIndices[i]];
         totalLightContrib += calculateLightContrib(light, in.pos, normalize(in.nor));
     }
 
-    var finalColor = mix(diffuseColor.rgb * totalLightContrib, generateClusterColor(clusterIndex), 0.2);
-    // var finalColor = ;
+    // var finalColor = in.fragPos.xyz;
+    // var finalColor = mix(diffuseColor.rgb * totalLightContrib, generateClusterColor(clusterIndex), 0.2);
+    // var finalColor = diffuseColor.rgb * 0.25 + vec3f(vec2f(DEBUG_clustercoords.xy) * 0.1, 1.0);
+    // var finalColor = diffuseColor.rgb * 0.25 + DEBUG_bounds_view;
+    // var finalColor = vec3f(vec2f(in.fragPos.xy) / vec2f(cameraUniforms.resolution), 0.0);
+    var finalColor = diffuseColor.rgb * 0.25
+                     + diffuseColor.rgb * totalLightContrib * 0.5
+                     + generateClusterColor(clusterIndex) * (DEBUG_clusterLightCount * 0.225 + 0.025);
+    // var finalColor = vec3(DEBUG_ZDepth);
     return vec4(finalColor, 1);
 }
 

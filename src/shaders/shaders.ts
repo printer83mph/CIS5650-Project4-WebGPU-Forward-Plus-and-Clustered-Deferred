@@ -37,8 +37,8 @@ export const constants = {
   // cluster things!
   bindGroup_clustering: 0,
 
-  maxLightsPerCluster: 8,
-  clusterSizeXY: 64,
+  maxLightsPerCluster: 32,
+  clusterSizeXY: 128,
   numClusterSlicesZ: 32,
 
   clusteringWorkgroupSize: 128,
