@@ -1,6 +1,6 @@
-@group(${bindGroup_scene}) @binding(0) var<uniform> cameraUniforms: CameraUniforms;
-@group(${bindGroup_scene}) @binding(1) var<storage, read> lightSet: LightSet;
-@group(${bindGroup_scene}) @binding(2) var<storage, read_write> clusterSet: ClusterSet;
+@group(${bindGroup_clustering}) @binding(0) var<uniform> cameraUniforms: CameraUniforms;
+@group(${bindGroup_clustering}) @binding(1) var<storage, read> lightSet: LightSet;
+@group(${bindGroup_clustering}) @binding(2) var<storage, read_write> clusterSet: ClusterSet;
 
 
 // TODO: prob move a bunch of these to common.wgsl
@@ -16,9 +16,6 @@ struct Plane {
 
 // this spits out AABB in clip space
 fn getClusterBounds(clusterCoord: vec3u) -> AABB {
-    // TODO: replace this with clusterSet.numClusters once we precompute that
-    let numClusters = cameraUniforms.resolution / ${clusterSizeXY};
-
     let fragmentPos    = clusterCoord.xy * ${clusterSizeXY};
     let fragmentMaxPos = fragmentPos + ${clusterSizeXY};
 
@@ -92,23 +89,10 @@ fn checkSphereClusterIntersection(clusterPlanes: array<Plane, 6>,
 @compute
 @workgroup_size(${clusteringWorkgroupSize})
 fn main(@builtin(global_invocation_id) globalIdx: vec3u) {
-    let clusterIdx = globalIdx.x;
-    if (clusterIdx > clusterSet.numClusters.x * clusterSet.numClusters.y) {
-        return;
-    }
-
-    // Calculate 3D cluster coordinates from linear index
-    let numClustersX = u32(cameraUniforms.resolution.x) / ${clusterSizeXY};
-    let numClustersY = u32(cameraUniforms.resolution.y) / ${clusterSizeXY};
-    let numClustersZ = ${numClusterSlicesZ};
-
-    let clusterZ = clusterIdx / (numClustersX * numClustersY);
-    let clusterY = (clusterIdx % (numClustersX * numClustersY)) / numClustersX;
-    let clusterX = clusterIdx % numClustersX;
-    let clusterCoord = vec3u(clusterX, clusterY, clusterZ);
+    let clusterIdx = getClusterIndexFromCoord(globalIdx, clusterSet.numClusters);
 
     // Get cluster bounds and planes
-    let bounds = getClusterBounds(clusterCoord);
+    let bounds = getClusterBounds(globalIdx);
     let clusterPlanes = getViewSpaceClusterPlanes(bounds, cameraUniforms.invProj);
 
     // Initialize a counter for the number of lights in this cluster

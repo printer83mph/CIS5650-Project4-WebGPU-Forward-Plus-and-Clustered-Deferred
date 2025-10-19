@@ -35,6 +35,8 @@ export const constants = {
   lightRadius: 2,
 
   // cluster things!
+  bindGroup_clustering: 0,
+
   maxLightsPerCluster: 8,
   clusterSizeXY: 64,
   numClusterSlicesZ: 32,

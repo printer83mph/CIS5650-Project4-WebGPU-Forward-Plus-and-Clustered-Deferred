@@ -53,6 +53,18 @@ fn getClusterZCoord(viewPosZ: f32, nearPlane: f32, farPlane: f32) -> u32 {
     return u32(log2(-viewPosZ / nearPlane) / clusterDepthLog);
 }
 
+fn getClusterIndexFromCoord(clusterCoord: vec3u, numClusters: vec2u) -> u32 {
+    // we lay out clusters in the array from major y -> x -> z minor
+    return clusterCoord.x +
+           clusterCoord.y * numClusters.x +
+           clusterCoord.z * numClusters.x * numClusters.y;
+    // ^ let's use the above for macthing debug images
+    // return clusterCoord.z
+    //        + clusterCoord.x * ${numClusterSlicesZ}
+    //        + clusterCoord.y * ${numClusterSlicesZ} * numClustersX;
+
+}
+
 // viewPos should be frag pos in view space
 fn getClusterIndex(fragPos: vec4f, viewPos: vec3f,
                    numClustersX: u32, numClustersY: u32,
@@ -63,12 +75,5 @@ fn getClusterIndex(fragPos: vec4f, viewPos: vec3f,
     );
     let clusterZCoord = getClusterZCoord(viewPos.z, nearPlane, farPlane);
 
-    // we lay out clusters in the array from major y -> x -> z minor
-    return clusterXYCoord.x +
-           clusterXYCoord.y * numClustersX +
-           clusterZCoord * numClustersX * numClustersY;
-    // ^ let's use the above for macthing debug images
-    // return clusterZCoord
-    //        + clusterXYCoord.x * ${numClusterSlicesZ}
-    //        + clusterXYCoord.y * ${numClusterSlicesZ} * numClustersX;
+    return getClusterIndexFromCoord(vec3u(clusterXYCoord, clusterZCoord), vec2u(numClustersX, numClustersY));
 }

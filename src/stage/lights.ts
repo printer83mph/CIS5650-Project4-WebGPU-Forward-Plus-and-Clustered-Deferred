@@ -14,7 +14,7 @@ function hueToRgb(h: number) {
 export class Lights {
   private camera: Camera;
 
-  numLights = 30;
+  numLights = 150;
   static readonly maxNumLights = 5000;
   static readonly numFloatsPerLight = 8; // vec3f is aligned at 16 byte boundaries
 
@@ -36,6 +36,7 @@ export class Lights {
   moveLightsComputePipeline: GPUComputePipeline;
 
   // these are assigned in `setupClusteringPipeline`
+  numClusters!: [number, number];
   clusteringComputeBindGroupLayout!: GPUBindGroupLayout;
   clusteringComputeBindGroup!: GPUBindGroup;
   clusteringComputePipeline!: GPUComputePipeline;
@@ -115,17 +116,17 @@ export class Lights {
       canvas.clientWidth * devicePixelRatio,
       canvas.clientHeight * devicePixelRatio,
     ];
-    const [clustersX, clustersY] = [
+    const [clustersX, clustersY, clustersZ] = [
       Math.ceil(screenWidth / shaders.constants.clusterSizeXY),
       Math.ceil(screenHeight / shaders.constants.clusterSizeXY),
+      shaders.constants.numClusterSlicesZ,
     ];
+    this.numClusters = [clustersX, clustersY];
 
     this.clusterSetStorageBuffer = device.createBuffer({
       label: 'clusters',
-      size: 16 + clustersX * clustersY * Lights.numFloatsPerCluster,
-      //    ^ 16 for numClusters + padding, plus (max lights per cluster) times (max possible cluster amount)
-      //                                         times 4 for u32 length
-
+      size: 16 + clustersX * clustersY * clustersZ * Lights.numFloatsPerCluster,
+      //    ^ 16 for numClusters + padding, plus (num clusters times floats per cluster)
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
     });
     // populate numClusters
@@ -218,11 +219,20 @@ export class Lights {
     );
   }
 
-  // @ts-expect-error TODO: use this
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   doLightClustering(encoder: GPUCommandEncoder) {
-    // TODO-2: run the light clustering compute pass(es) here
     // implementing clustering here allows for reusing the code in both Forward+ and Clustered Deferred
+    const computePass = encoder.beginComputePass();
+    computePass.setPipeline(this.clusteringComputePipeline);
+    computePass.setBindGroup(
+      shaders.constants.bindGroup_clustering,
+      this.clusteringComputeBindGroup,
+    );
+
+    const [clustersX, clustersY] = this.numClusters;
+    const clustersZ = shaders.constants.numClusterSlicesZ;
+
+    computePass.dispatchWorkgroups(clustersX, clustersY, clustersZ);
+    computePass.end();
   }
 
   // CHECKITOUT: this is where the light movement compute shader is dispatched from the host

@@ -41,27 +41,25 @@ fn main(in: FragmentInput) -> @location(0) vec4f
         discard;
     }
 
-    // TODO: replace this with clusterSet.numClusters once we precompute that
-    let numClusters = cameraUniforms.resolution / ${clusterSizeXY};
     let clusterIndex = getClusterIndex(
       in.fragPos,
       in.viewPos.xyz,
-      numClusters.x,
-      numClusters.y,
+      clusterSet.numClusters.x,
+      clusterSet.numClusters.y,
       cameraUniforms.nearPlane,
       cameraUniforms.farPlane
     );
 
     // TODO: once cluster-intersecting lights are computed, this should work!
-    // var totalLightContrib = vec3f(0, 0, 0);
-    // let cluster = clusterSet.clusters[0];
-    // for (var i = 0u; i < cluster.numLights; i++) {
-    //     let light = lightSet.lights[cluster.lightIndices[i]];
-    //     totalLightContrib += calculateLightContrib(light, in.pos, normalize(in.nor));
-    // }
+    var totalLightContrib = vec3f(0, 0, 0);
+    let cluster = clusterSet.clusters[0];
+    for (var i = 0u; i < cluster.numLights; i++) {
+        let light = lightSet.lights[cluster.lightIndices[i]];
+        totalLightContrib += calculateLightContrib(light, in.pos, normalize(in.nor));
+    }
 
-    // var finalColor = diffuseColor.rgb * totalLightContrib;
-    var finalColor = generateClusterColor(clusterIndex);
+    var finalColor = mix(diffuseColor.rgb * totalLightContrib, generateClusterColor(clusterIndex), 0.2);
+    // var finalColor = ;
     return vec4(finalColor, 1);
 }
 
