@@ -50,7 +50,6 @@ fn main(in: FragmentInput) -> @location(0) vec4f
       cameraUniforms.farPlane
     );
 
-    var totalLightContrib = vec3f(0, 0, 0);
     // let cluster = clusterSet.clusters[1];
     let cluster = clusterSet.clusters[clusterIndex];
 
@@ -68,9 +67,14 @@ fn main(in: FragmentInput) -> @location(0) vec4f
     let DEBUG_ZDepth = f32(DEBUG_supposedClusterZIndex) / f32(${numClusterSlicesZ});
 
 
+    var totalLightContrib = vec3f(0, 0, 0);
     for (var i = 0u; i < cluster.numLights; i++) {
         let light = lightSet.lights[cluster.lightIndices[i]];
         totalLightContrib += calculateLightContrib(light, in.pos, normalize(in.nor));
+        // totalLightContrib += light.color * 0.5;
+        // if (length(light.pos - in.pos) < 1) {
+        //     totalLightContrib += light.color * 1.0;
+        // }
     }
 
     // var finalColor = in.fragPos.xyz;
@@ -78,10 +82,12 @@ fn main(in: FragmentInput) -> @location(0) vec4f
     // var finalColor = diffuseColor.rgb * 0.25 + vec3f(vec2f(DEBUG_clustercoords.xy) * 0.1, 1.0);
     // var finalColor = diffuseColor.rgb * 0.25 + DEBUG_bounds_view;
     // var finalColor = vec3f(vec2f(in.fragPos.xy) / vec2f(cameraUniforms.resolution), 0.0);
-    var finalColor = diffuseColor.rgb * 0.25
-                     + diffuseColor.rgb * totalLightContrib * 0.5
-                     + generateClusterColor(clusterIndex) * (DEBUG_clusterLightCount * 0.225 + 0.025);
+    // var finalColor = diffuseColor.rgb * 0.25
+    //                  + diffuseColor.rgb * totalLightContrib * 0.5
+    //                  + generateClusterColor(clusterIndex) * (DEBUG_clusterLightCount * 0.225 + 0.025);
     // var finalColor = vec3(DEBUG_ZDepth);
+    var finalColor = diffuseColor.rgb * totalLightContrib;
+
     return vec4(finalColor, 1);
 }
 
